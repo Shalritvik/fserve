@@ -1,0 +1,21 @@
+# Build trees (one per CMake preset)
+build/
+out/
+
+# Compiler / tooling artifacts
+compile_commands.json
+.cache/
+*.o
+*.a
+*.so
+*.gcda
+*.gcno
+
+# Models are large binaries -- never commit a GGUF.
+models/
+*.gguf
+
+# Editors
+.vscode/
+.idea/
+*.swp
