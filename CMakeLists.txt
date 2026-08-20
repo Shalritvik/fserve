@@ -40,17 +40,26 @@ find_package(Threads REQUIRED)
 # ---------------------------------------------------------------------------
 add_library(fserve_core
     src/engine/mock_engine.cpp
+    src/http/server.cpp
 )
 
 target_include_directories(fserve_core
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+# httplib and nlohmann are PRIVATE: they appear only inside server.cpp, never
+# in a public header. That is what the PIMPL in server.hpp buys -- consumers
+# of fserve_core do not pay to parse httplib.h.
 target_link_libraries(fserve_core
-    PUBLIC Threads::Threads
+    PUBLIC  Threads::Threads
+    PRIVATE httplib::httplib nlohmann_json::nlohmann_json
 )
 
 target_compile_options(fserve_core PRIVATE -Wall -Wextra -Wpedantic)
+
+add_executable(fserve src/main.cpp)
+target_link_libraries(fserve PRIVATE fserve_core)
+target_compile_options(fserve PRIVATE -Wall -Wextra -Wpedantic)
 
 if(FSERVE_BUILD_TESTS)
     enable_testing()
