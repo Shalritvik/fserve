@@ -25,9 +25,43 @@ FetchContent_Declare(
     GIT_SHALLOW    TRUE
 )
 set(HTTPLIB_COMPILE OFF CACHE BOOL "" FORCE)
+
+# Turn off every optional codec and TLS backend.
+#
+# HTTPLIB_REQUIRE_* only controls whether a missing library is a hard error.
+# The opportunistic probing is HTTPLIB_USE_*_IF_AVAILABLE, which defaults ON,
+# and that is what has to be disabled. Left on, cpp-httplib find_package()s
+# for zstd/brotli/zlib/openssl -- and on this machine CMake derives search
+# prefixes from PATH, which contains C:\msys64\ucrt64\bin, so it happily
+# found MinGW Windows headers and fed -isystem /mnt/c/msys64/ucrt64/include
+# to a Linux GCC build. fserve serves plaintext HTTP on localhost and needs
+# none of these.
 set(HTTPLIB_REQUIRE_OPENSSL OFF CACHE BOOL "" FORCE)
 set(HTTPLIB_REQUIRE_ZLIB OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_REQUIRE_BROTLI OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_REQUIRE_ZSTD OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_USE_ZLIB_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_USE_BROTLI_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_USE_ZSTD_IF_AVAILABLE OFF CACHE BOOL "" FORCE)
+set(HTTPLIB_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(httplib)
+
+# ---------------------------------------------------------------------------
+# nlohmann/json -- request and response codec.
+#
+# Conventional choice for a project this size: header-only, ergonomic, and
+# FetchContent-friendly. It is not the fastest JSON library available; if
+# parsing ever shows up in a profile, RapidJSON is the swap.
+# ---------------------------------------------------------------------------
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG        v3.12.0
+    GIT_SHALLOW    TRUE
+)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+FetchContent_MakeAvailable(nlohmann_json)
 
 # ---------------------------------------------------------------------------
 # GoogleTest -- only fetched when tests are actually being built, so a
