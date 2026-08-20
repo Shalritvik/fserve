@@ -19,3 +19,6 @@ models/
 .vscode/
 .idea/
 *.swp
+
+# Claude Code local permission grants -- machine-specific, not project state.
+.claude/settings.local.json
